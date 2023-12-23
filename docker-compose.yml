@@ -1,0 +1,36 @@
+version: '3.1'
+
+services:
+  redis:
+    image: redis:latest
+    container_name: redis-container
+    environment:
+      REDIS_PASSWORD: password
+    ports:
+      - "6379:6379"
+    networks:
+      - ressy-network
+
+  spring-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ressy-home-service-container
+    environment:
+      SPRING_CACHE_TYPE: redis
+      SPRING_REDIS_PORT: 6379
+      SPRING_REDIS_HOST: redis-container
+      SPRING_REDIS_PASSWORD: password
+      SPRING_RABBITMQ_HOST : ec2-54-155-120-5.eu-west-1.compute.amazonaws.com
+      SPRING_RABBITMQ_PORT : 5672
+      SPRING_RABBITMQ_USERNAME : ressyAdmin
+      SPRING_RABBITMQ_PASSWORD : password1
+    ports:
+      - "8080:8080"
+    depends_on:
+      - redis
+    networks:
+      - ressy-network
+networks:
+  ressy-network:
+    driver: bridge
